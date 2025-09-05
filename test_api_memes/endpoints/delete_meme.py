@@ -1,5 +1,7 @@
 import requests
 from endpoints.endpoint import Endpoint
+import allure
+import json
 
 
 class DeleteMeme(Endpoint):
@@ -15,8 +17,11 @@ class DeleteMeme(Endpoint):
             f"{self.url}/meme/{meme_id}",
             headers=headers
         )
-        try:
-            self.json = self.response.json()
-        except requests.JSONDecodeError:
-            self.json = None
+
         return self.response
+
+    @allure.step("Check that success message is correct for meme_id={meme_id}")
+    def check_response_message_is_correct(self, meme_id):
+        expected_message = f"Meme with id {meme_id} successfully deleted"
+        actual_message = self.response.text
+        assert actual_message == expected_message

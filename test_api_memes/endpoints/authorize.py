@@ -5,14 +5,22 @@ from endpoints.endpoint import Endpoint
 class Authorize(Endpoint):
     token = None
 
-    def authorize(self):
+    def authorize(self, payload):
         self.response = requests.post(
             f"{self.url}/authorize",
-            json={"name": "name_test"}
+            json=payload
         )
-        self.response.raise_for_status()
-        self.token = self.response.json().get("token")
-        return self.token
+        # Успешная авторизация → сохраняем токен
+        if self.response.status_code == 200:
+            try:
+                self.token = self.response.json().get("token")
+            except ValueError:
+                self.token = None
+            return self.token
+
+        # Негативный сценарий → просто возвращаем None
+        self.token = None
+        return None
 
 
     def check_token(self):
